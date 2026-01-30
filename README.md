@@ -1,92 +1,61 @@
-## 🎶 Music Generation with LSTM
+# Music Generation with LSTM
+A deep learning project that generates music sequences using a many-to-many LSTM architecture trained on MIDI data. The model predicts notes and chords step-by-step, enabling the creation of new musical sequences.
 
-This module generates music sequences using a many-to-many LSTM architecture trained on MIDI data.
+## Dataset & Preprocessing
+- Loads data from `original_metheny.mid`  
+- Extracts sequences of notes/chords and encodes them as one-hot vectors  
+- Total unique note values: `n_values = 90`  
 
----
+## Project Pipeline
 
-### 🎼 Dataset & Preprocessing
+### Sequence Extraction
+- Extract sequences of notes/chords from MIDI files.
+- Encode sequences as one-hot vectors for model input.
 
-- Loads data from `original_metheny.mid`
-- Preprocessing extracts sequences of notes/chords and encodes them as one-hot vectors
-- Total unique note values: `n_values = 90`
+### Model Construction
+- Many-to-many LSTM architecture with 64-unit LSTM cells.
+- Dense layer with softmax over note categories.
+- Input shape: `(m, Tx, n_values)` with `Tx=30` time steps by default.
 
-```python
-X, Y, n_values, indices_values, chords = load_music_utils('data/original_metheny.mid')
-```
-
----
-
-### 🧱 Model Architecture
-
-Built using TensorFlow and Keras:
-
-- Input shape: `(m, Tx, n_values)`
-- LSTM Cell: 64 units
-- Output Dense layer with softmax over note categories
-- Repeats LSTM for `Tx` time steps (30 by default)
-
-```python
-model = djmodel(Tx=30, LSTM_cell=LSTM_cell, densor=densor, reshaper=reshaper)
-```
-
----
-
-### 🏋️ Training
-
+### Training
 - Optimizer: Adam with decay
 - Loss: Categorical crossentropy
 - Trains for 100 epochs on sequences
 
-```python
-model.compile(optimizer=opt, loss='categorical_crossentropy')
-history = model.fit([X, a0, c0], list(Y), epochs=100)
-```
+## Inference
+- Generate music step-by-step using previous outputs as input.
+- Prediction loop over `Ty=50` time steps by default.
 
----
+## Audio Conversion
+- Convert predicted indices to MIDI using `generate_music`.
+- Save MIDI to `output/my_music.midi` and convert to WAV.
 
-### 🔮 Inference Model
+## Dependencies
+- TensorFlow
+- Keras
+- NumPy
+- music21 library for symbolic music processing
 
-- Generates music step-by-step using previous outputs as input
-- Prediction loop over `Ty` steps (default = 50)
+## Folder Structure
+- `data/` – Original MIDI files
+- `outputs/` – Generated MIDI and WAV files
+- `grammar.py` – Music grammar helpers
+- `preprocess.py` – Data preprocessing logic
+- `music_utils.py` – Audio and MIDI conversion
+- `data_utils.py` – Sequence loading and encoding
+- `qa.py` – Quality assurance utilities
+- `outputs.py` – Output summary comparators
+- `test_utils.py` – Unit test utilities
 
-```python
-inference_model = music_inference_model(LSTM_cell, densor, Ty=50)
-results, indices = predict_and_sample(inference_model)
-```
+## Output
+Generated music sequences in MIDI and WAV format. The model can produce raw sequences, post-training outputs, or fully generated compositions.
 
----
+## Applications
+- Symbolic music generation and composition
+- Experimenting with sequence modeling for music
+- Music-assisted creative projects or tools
 
-### 🎧 Audio Output
+## License
+Intended for research, educational, and internal development use. For production or commercial deployment, additional testing and validation are recommended.
 
-- Converts sampled indices to MIDI using `generate_music`
-- Writes to `output/my_music.midi` and converts to WAV
-- You can listen to:
-  - Raw input: `30s_seq.wav`
-  - Post-training: `30s_trained_model.wav`
-  - Your model: `rendered.wav`
 
-```python
-out_stream = generate_music(inference_model, indices_values, chords)
-mid2wav('output/my_music.midi')
-```
-
----
-
-### 🧪 Files Used
-
-```bash
-├── grammar.py           # Music grammar helpers
-├── qa.py                # Quality assurance utilities
-├── preprocess.py        # Data preparation logic
-├── music_utils.py       # Audio and MIDI conversion
-├── data_utils.py        # Sequence loading and encoding
-├── outputs.py           # Output summary comparators
-├── test_utils.py        # Unit test utilities
-```
-
----
-
-### 📚 References
-
-- [music21 Library](http://web.mit.edu/music21/) – Symbolic music processing
-- [Karpathy’s Char-RNN Inspiration](http://karpathy.github.io/2015/05/21/rnn-effectiveness/)
